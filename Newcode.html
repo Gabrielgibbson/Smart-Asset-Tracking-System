@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Asset Management System (SAMS)</title>
+    <!-- Load Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Lucide Icons for aesthetic icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        /* Custom styles to match the green/white theme and ensure responsiveness */
+        :root {
+            --primary-green: #039343; /* Adjusted deep green from the logo/design */
+            --secondary-green: #e6f6ee;
+            --text-blue: #1c4b82;
+            --text-red: #cc2936;
+            --text-yellow: #a87900;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        /* Utility class for the primary action button */
+        .btn-primary {
+            background-color: var(--primary-green);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #026b30;
+        }
+
+        /* Utility class for secondary action button */
+        .btn-secondary {
+            border: 1px solid var(--primary-green);
+            color: var(--primary-green);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        .btn-secondary:hover {
+            background-color: var(--secondary-green);
+        }
+
+        /* Style for the dashboard navigation links */
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+        .nav-link:hover {
+            background-color: #e2e8f0;
+        }
+        .nav-link.active {
+            background-color: var(--primary-green);
+            color: white;
+            font-weight: 600;
+        }
+        .nav-link.active .icon {
+            color: white !important;
+        }
+
+        /* Status Pills */
+        .status-active { color: var(--primary-green); font-weight: 600; }
+        .status-faulty { color: var(--text-red); font-weight: 600; }
+        .status-under-maintenance { color: var(--text-yellow); font-weight: 600; }
+        .status-repaired { color: var(--primary-green); font-weight: 600; }
+
+        /* Icon colors */
+        .icon {
+            color: var(--primary-green);
+            margin-right: 0.75rem;
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        /* Card styles for dashboard summary */
+        .summary-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .card-value {
+            font-size: 2.25rem; /* text-4xl */
+            font-weight: 700;
+            margin-top: 0.5rem;
+        }
+        /* Specific colors for card values */
+        .card-value-blue { color: var(--text-blue); }
+        .card-value-red { color: var(--text-red); }
+        .card-value-green { color: var(--primary-green); }
+        .card-value-yellow { color: var(--text-yellow); }
+
+        /* Table styling */
+        .data-table th {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 2px solid #e2e8f0;
+            font-weight: 600;
+            color: #4b5563;
+        }
+        .data-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .data-table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        /* Utility for centering modal */
+        .modal-overlay {
+            z-index: 50;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Main Application Container -->
+    <div id="app-container">
+        <!-- All page content will be rendered here by JavaScript -->
+    </div>
+
+    <!-- Modal Container for Confirmation/Alerts -->
+    <div id="modal-container" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden modal-overlay items-center justify-center">
+        <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full">
+            <h3 id="modal-title" class="text-xl font-bold mb-4 text-gray-800"></h3>
+            <p id="modal-message" class="mb-6 text-gray-600"></p>
+            <div id="modal-actions" class="flex justify-end space-x-3">
+                <!-- Buttons will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application JavaScript -->
+    <script>
+        // --- 1. DATA STORAGE & INITIALIZATION (Simulated Backend) ---
+        const LOCAL_STORAGE_KEY = 'sams_data_v1';
+        const APP_ID = 'smart-asset-management-system';
+
+        // Initial Data Structure and Mock Data (Users, Assets, Transactions)
+        let appData = {
+            users: [
+                { id: 'u001', name: 'Admin User', email: 'admin@sams.edu', password: 'password', role: 'Admin', department: 'IT' },
+                { id: 'u002', name: 'Staff Jane Doe', email: 'jane@sams.edu', password: 'password', role: 'Staff', department: 'English' },
+                { id: 'u003', name: 'Maint. John Smith', email: 'john@sams.edu', password: 'password', role: 'Maintenance', department: 'Works' },
+                { id: 'u004', name: 'Staff Mary K', email: 'mary@sams.edu', password: 'password', role: 'Staff', department: 'Science' },
+            ],
+            assets: [
+                { id: 'A-101', name: 'Laptop HP Probook 450', category: 'Electronics', status: 'Active', assignedToId: 'u002', assignedToName: 'Staff Jane Doe', dateAdded: '10/10/25' },
+                { id: 'A-043', name: 'Projector Epson X12', category: 'Electronics', status: 'Faulty', assignedToId: 'u002', assignedToName: 'Staff Jane Doe', dateAdded: '03/10/25' },
+                { id: 'A-176', name: 'Printer HP LaserJet', category: 'Electronics', status: 'Under maintenance', assignedToId: 'u001', assignedToName: 'Admin User', dateAdded: '28/09/25' },
+                { id: 'A-200', name: 'Office Chair Ergonomic', category: 'Furniture', status: 'Active', assignedToId: 'u004', assignedToName: 'Staff Mary K', dateAdded: '15/11/25' },
+            ],
+            faults: [
+                { id: 'f001', assetId: 'A-043', assetName: 'Projector Epson X12', reportedBy: 'Staff Jane Doe', dateReported: '03/10/25', description: 'Power supply failure.', status: 'Ongoing' },
+            ],
+            transactions: [] // Simplified for scope, but structure allows tracking
+        };
+
+        let currentUser = null;
+
+        // Utility to load data from localStorage or use defaults
+        const loadData = () => {
+            try {
+                const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+                if (storedData) {
+                    appData = JSON.parse(storedData);
+                }
+            } catch (error) {
+                console.error("Error loading data from localStorage:", error);
+            }
+        };
+
+        // Utility to save data to localStorage
+        const saveData = () => {
+            try {
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(appData));
+            } catch (error) {
+                console.error("Error saving data to localStorage:", error);
+                showModal('Error', 'Could not save data to local storage. Your changes may not persist.', null, 'Close');
+            }
+        };
+
+        // --- 2. CORE UTILITIES (Routing and UI Management) ---
+        const appContainer = document.getElementById('app-container');
+        const modalContainer = document.getElementById('modal-container');
+        let currentView = 'welcome';
+
+        // Simple router: Renders the appropriate page based on the view state
+        const navigate = (view) => {
+            currentView = view;
+            render();
+            // Re-render Lucide icons after new HTML is injected
+            lucide.createIcons();
+        };
+
+        // Central render function
+        const render = () => {
+            let html = '';
+            // Authentication guards
+            if (['admin', 'staff', 'maintenance'].includes(currentView) && !currentUser) {
+                currentView = 'login';
+            }
+
+            switch (currentView) {
+                case 'welcome':
+                    html = renderWelcomeScreen();
+                    break;
+                case 'login':
+                case 'signup':
+                    html = renderAuthScreen(currentView);
+                    break;
+                case 'admin':
+                    html = renderAdminDashboard();
+                    break;
+                case 'staff':
+                    html = renderStaffDashboard();
+                    break;
+                case 'maintenance':
+                    html = renderMaintenanceDashboard();
+                    break;
+                case 'admin-add-asset':
+                    html = renderAddAssetScreen();
+                    break;
+                case 'admin-manage-users':
+                    html = renderManageUsersScreen();
+                    break;
+                case 'staff-report-fault':
+                    html = renderReportFaultScreen();
+                    break;
+                case 'maintenance-update-status':
+                    html = renderUpdateStatusScreen();
+                    break;
+                default:
+                    html = render404();
+            }
+
+            appContainer.innerHTML = html;
+            attachEventListeners(); // Re-attach listeners after DOM update
+        };
+
+        // Custom Modal/Alert function (since alert() is forbidden)
+        const showModal = (title, message, callback = null, confirmText = 'OK', cancelText = null) => {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            const actions = document.getElementById('modal-actions');
+            actions.innerHTML = '';
+
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'px-4 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100';
+            closeBtn.textContent = cancelText || (callback ? 'Cancel' : 'Close');
+            closeBtn.onclick = () => { modalContainer.classList.add('hidden'); };
+
+            const confirmBtn = document.createElement('button');
+            confirmBtn.className = 'px-4 py-2 text-sm font-medium rounded-md btn-primary';
+            confirmBtn.textContent = confirmText;
+            confirmBtn.onclick = () => {
+                modalContainer.classList.add('hidden');
+                if (callback) callback();
+            };
+
+            if (cancelText || callback) {
+                actions.appendChild(closeBtn);
+            }
+            actions.appendChild(confirmBtn);
+
+            modalContainer.classList.remove('hidden');
+        };
+
+
+        // --- 3. TEMPLATING: PAGES & COMPONENTS ---
+
+        // 3.1 Welcome Screen (7.1)
+        const renderWelcomeScreen = () => {
+            const logoUrl = 'https://upload.wikimedia.org/wikipedia/en/thumb/5/52/Federal_University_of_Agriculture%2C_Abeokuta_logo.svg/450px-Federal_University_of_Agriculture%2C_Abeokuta_logo.svg.png';
+            return `
+                <div class="min-h-screen flex flex-col items-center justify-center p-4" style="background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);">
+                    <div class="text-center">
+                        <img src="${logoUrl}" onerror="this.onerror=null;this.src='https://placehold.co/180x180/039343/ffffff?text=Logo';" alt="University Logo" class="w-44 h-44 mx-auto mb-8 rounded-full shadow-lg">
+
+                        <h1 class="text-4xl sm:text-5xl font-extrabold mb-2" style="color: var(--primary-green);">
+                            SMART ASSET MANAGEMENT SYSTEM
+                        </h1>
+                        <p class="text-xl text-gray-600 mb-12">
+                            Manages your university assets efficiently
+                        </p>
+
+                        <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+                            <button id="btn-signup-nav" class="btn-primary w-64 sm:w-40 shadow-lg hover:shadow-xl">Sign Up</button>
+                            <button id="btn-login-nav" class="btn-secondary w-64 sm:w-40 bg-white shadow-lg hover:bg-gray-50">Login</button>
+                        </div>
+                    </div>
+
+                    <p class="mt-20 text-sm text-gray-400">© 2025 FUNAAB Smart Asset Management System</p>
+                </div>
+            `;
+        };
+
+        // 3.2 Authentication Screen (Login/Sign Up) (7.2)
+        const renderAuthScreen = (mode) => {
+            const isLogin = mode === 'login';
+            const title = isLogin ? 'Login' : 'Sign Up';
+            const buttonText = isLogin ? 'Login' : 'Create Account';
+            const switchLink = isLogin ? 'Create account' : 'Login';
+            const switchMode = isLogin ? 'signup' : 'login';
+            const formId = isLogin ? 'login-form' : 'signup-form';
+
+            return `
+                <div class="min-h-screen flex items-center justify-center p-4 bg-gray-50">
+                    <div class="w-full max-w-md bg-white p-8 rounded-xl shadow-2xl border border-gray-100">
+                        <h2 class="text-3xl font-bold text-center mb-6" style="color: var(--primary-green);">
+                            ${title}
+                        </h2>
+
+                        <form id="${formId}" class="space-y-4">
+                            ${!isLogin ? `
+                                <input type="text" id="signup-surname" placeholder="Surname" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                                <input type="text" id="signup-lastname" placeholder="Last Name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                                <input type="email" id="signup-email" placeholder="E-mail" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                                <div class="flex space-x-4">
+                                    <select id="signup-department" required class="w-1/2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                                        <option value="" disabled selected>Department</option>
+                                        <option value="IT">IT</option>
+                                        <option value="English">English</option>
+                                        <option value="Works">Works</option>
+                                        <option value="Science">Science</option>
+                                    </select>
+                                    <select id="signup-role" required class="w-1/2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                                        <option value="" disabled selected>Role</option>
+                                        <option value="Staff">Staff</option>
+                                        <option value="Maintenance">Maintenance Officer</option>
+                                        <option value="Admin">Admin</option>
+                                    </select>
+                                </div>
+                            ` : `
+                                <div class="relative">
+                                    <input type="email" id="login-email" placeholder="Email" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                                    <i data-lucide="user" class="absolute right-3 top-3.5 text-gray-400 w-5 h-5"></i>
+                                </div>
+                            `}
+                            <div class="relative">
+                                <input type="password" id="${isLogin ? 'login-password' : 'signup-password'}" placeholder="Password" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                                <i data-lucide="lock" class="absolute right-3 top-3.5 text-gray-400 w-5 h-5"></i>
+                            </div>
+                            ${!isLogin ? `
+                                <input type="password" id="signup-confirm-password" placeholder="Confirm Password" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                            ` : `
+                                <div class="flex justify-between items-center text-sm">
+                                    <label class="flex items-center text-gray-600">
+                                        <input type="checkbox" id="login-remember" class="mr-2 rounded text-green-600 border-gray-300 focus:ring-green-500">
+                                        Remember me
+                                    </label>
+                                    <a href="#" class="text-xs font-medium text-gray-500 hover:text-green-700">Forgot Password?</a>
+                                </div>
+                            `}
+
+                            <button type="submit" class="w-full btn-primary mt-6 shadow-lg hover:shadow-xl">
+                                ${buttonText}
+                            </button>
+                        </form>
+
+                        <div class="text-center mt-4 text-sm text-gray-600">
+                            ${isLogin ? "Don't have an account?" : "Already have an account?"}
+                            <a href="#" id="auth-switch-link" data-mode="${switchMode}" class="font-medium hover:text-green-700" style="color: var(--primary-green);">
+                                ${switchLink}
+                            </a>
+                        </div>
+
+                        <div class="flex items-center my-6">
+                            <hr class="flex-grow border-gray-200">
+                            <span class="px-3 text-sm text-gray-400">Or continue with</span>
+                            <hr class="flex-grow border-gray-200">
+                        </div>
+
+                        <button class="w-full py-3 border border-gray-300 rounded-lg flex items-center justify-center space-x-2 text-gray-700 hover:bg-gray-50 transition">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Logo_Google_2020_-_Icon.png" alt="Google" class="w-5 h-5">
+                            <span>Google</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        };
+
+        // Shared Dashboard Layout Component
+        const renderDashboardLayout = (title, contentHtml) => {
+            if (!currentUser) return ''; // Should be caught by the router, but safety first
+
+            const role = currentUser.role;
+            const navItems = {
+                'Admin': [
+                    { icon: 'home', label: 'Home', view: 'admin' },
+                    { icon: 'package', label: 'Assets', view: 'admin-assets' },
+                    { icon: 'users', label: 'Users', view: 'admin-manage-users' },
+                    { icon: 'line-chart', label: 'Transactions', view: 'admin-transactions' },
+                    { icon: 'wrench', label: 'Maintenance', view: 'admin-maintenance' },
+                    { icon: 'file-text', label: 'Report', view: 'admin-reports' },
+                ],
+                'Staff': [
+                    { icon: 'home', label: 'Home', view: 'staff' },
+                    { icon: 'package', label: 'My assets', view: 'staff-assets' },
+                    { icon: 'line-chart', label: 'Transactions', view: 'staff-transactions' },
+                    { icon: 'alert-triangle', label: 'Report fault', view: 'staff-report-fault' },
+                    { icon: 'info', label: 'Status', view: 'staff-status' },
+                ],
+                'Maintenance': [
+                    { icon: 'home', label: 'Home', view: 'maintenance' },
+                    { icon: 'alert-triangle', label: 'Reported assets', view: 'maintenance-reported' },
+                    { icon: 'refresh-cw', label: 'Update status', view: 'maintenance-update-status' },
+                    { icon: 'file-text', label: 'Maintenance records', view: 'maintenance-records' },
+                    { icon: 'info', label: 'Status', view: 'maintenance-status' },
+                ]
+            };
+
+            // Get the current nav items for the user's role
+            const navLinks = navItems[role] || [];
+
+            // Helper to get the first letter of the user's name
+            const userInitial = currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U';
+            const userRoleDisplay = role === 'Maintenance' ? 'Maintenance' : role; // Shorter for display
+
+            // Filter assets/faults relevant to the current user for notifications
+            const assignedAssetsCount = appData.assets.filter(a => a.assignedToId === currentUser.id).length;
+            const myFaultsCount = appData.faults.filter(f => f.reportedBy === currentUser.name && f.status !== 'Repaired').length;
+            const maintenanceCount = appData.faults.filter(f => f.status === 'Ongoing').length;
+            
+            let notificationCount = 0;
+            if (role === 'Staff') notificationCount = myFaultsCount; // Staff cares about their fault status
+            if (role === 'Maintenance') notificationCount = maintenanceCount; // Maintenance cares about ongoing repairs
+            if (role === 'Admin') notificationCount = appData.faults.length; // Admin cares about all faults
+
+            return `
+                <div class="min-h-screen flex bg-gray-50">
+                    <!-- Sidebar -->
+                    <div class="w-64 bg-white p-6 shadow-xl flex flex-col justify-between">
+                        <div>
+                            <h2 class="text-xl font-bold mb-8 text-gray-800">${userRoleDisplay}'s Dashboard</h2>
+                            <nav class="space-y-1">
+                                ${navLinks.map(item => `
+                                    <a id="nav-${item.view}" href="#" class="nav-link ${currentView === item.view ? 'active' : ''}" data-view="${item.view}">
+                                        <i data-lucide="${item.icon}" class="icon ${currentView !== item.view ? 'text-gray-500' : ''}"></i>
+                                        <span>${item.label}</span>
+                                    </a>
+                                `).join('')}
+                                <div class="pt-4 mt-4 border-t border-gray-100">
+                                    <a id="btn-logout" href="#" class="nav-link text-red-600 hover:bg-red-50">
+                                        <i data-lucide="log-out" class="icon text-red-600"></i>
+                                        <span>Log out</span>
+                                    </a>
+                                </div>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="flex-1 p-6 sm:p-10">
+                        <header class="flex justify-end items-center mb-10">
+                            <span class="text-lg font-semibold text-gray-700 mr-4">WELCOME, ${userRoleDisplay}</span>
+                            <div class="flex items-center space-x-4">
+                                <!-- User Icon -->
+                                <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold text-gray-700 shadow-md">
+                                    ${userInitial}
+                                </div>
+                                <!-- Notification Bell -->
+                                <div class="relative cursor-pointer">
+                                    <i data-lucide="bell" class="w-6 h-6 text-gray-500"></i>
+                                    ${notificationCount > 0 ? `
+                                        <span class="absolute top-0 right-0 block h-3 w-3 rounded-full ring-2 ring-white bg-red-500 text-white text-xs font-bold flex items-center justify-center">
+                                            ${notificationCount}
+                                        </span>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </header>
+
+                        <!-- Page Content Title -->
+                        <h1 class="text-3xl font-bold mb-8 text-gray-800">${title}</h1>
+
+                        <!-- Content Area -->
+                        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                            ${contentHtml}
+                        </div>
+
+                        <footer class="mt-12 text-center text-sm text-gray-400">
+                            © 2025 FUNAAB Smart Asset Management System
+                        </footer>
+                    </div>
+                </div>
+            `;
+        };
+
+        // 3.3 Admin Dashboard (7.3)
+        const renderAdminDashboard = () => {
+            // Metrics calculation
+            const totalAssets = appData.assets.length;
+            const assignedAssets = appData.assets.filter(a => a.assignedToId).length;
+            const faultyAssets = appData.assets.filter(a => a.status === 'Faulty' || a.status === 'Under maintenance').length;
+            const activeUsers = appData.users.length;
+            const recentAssets = appData.assets.slice(0, 5); // Show latest 5
+
+            const content = `
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                    <div class="summary-card">
+                        <i data-lucide="box" class="w-8 h-8 mx-auto text-gray-500 mb-2"></i>
+                        <p class="text-sm font-medium text-gray-500">Total Assets</p>
+                        <p class="card-value card-value-blue">${totalAssets}</p>
+                    </div>
+                    <div class="summary-card">
+                        <i data-lucide="user-check" class="w-8 h-8 mx-auto text-gray-500 mb-2"></i>
+                        <p class="text-sm font-medium text-gray-500">Assigned Assets</p>
+                        <p class="card-value card-value-blue">${assignedAssets}</p>
+                    </div>
+                    <div class="summary-card">
+                        <i data-lucide="alert-triangle" class="w-8 h-8 mx-auto text-gray-500 mb-2"></i>
+                        <p class="text-sm font-medium text-gray-500">Faulty Assets</p>
+                        <p class="card-value card-value-red">${faultyAssets}</p>
+                    </div>
+                    <div class="summary-card">
+                        <i data-lucide="users" class="w-8 h-8 mx-auto text-gray-500 mb-2"></i>
+                        <p class="text-sm font-medium text-gray-500">Active Users</p>
+                        <p class="card-value card-value-green">${activeUsers}</p>
+                    </div>
+                </div>
+
+                <!-- Recent Records Table -->
+                <h3 class="text-xl font-semibold mb-4 text-gray-700">RECENT ASSET RECORDS</h3>
+                <div class="overflow-x-auto">
+                    <table class="data-table min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr>
+                                <th>Asset ID</th>
+                                <th>Asset Name</th>
+                                <th>Assigned To</th>
+                                <th>Status</th>
+                                <th>Date Added</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${recentAssets.map(asset => `
+                                <tr>
+                                    <td>${asset.id}</td>
+                                    <td>${asset.name}</td>
+                                    <td>${asset.assignedToName || 'Unassigned'}</td>
+                                    <td>
+                                        <span class="${asset.status === 'Active' ? 'status-active' : asset.status === 'Faulty' ? 'status-faulty' : 'status-under-maintenance'}">
+                                            ${asset.status}
+                                        </span>
+                                    </td>
+                                    <td>${asset.dateAdded}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="flex justify-end mt-4">
+                    <a href="#" id="view-all-assets" class="text-sm font-medium text-gray-500 hover:text-green-700" data-view="admin-assets">View all assets</a>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap justify-center sm:justify-start gap-4 mt-10 border-t pt-6">
+                    <button id="btn-add-new-asset" class="btn-primary flex items-center space-x-2">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                        <span>Add new assets</span>
+                    </button>
+                    <button class="btn-secondary flex items-center space-x-2 bg-white">
+                        <i data-lucide="file-text" class="w-5 h-5"></i>
+                        <span>Generate reports</span>
+                    </button>
+                    <button id="btn-manage-users" class="btn-secondary flex items-center space-x-2 bg-white">
+                        <i data-lucide="users" class="w-5 h-5"></i>
+                        <span>Manage users</span>
+                    </button>
+                </div>
+            `;
+            return renderDashboardLayout('Admin Dashboard', content);
+        };
+
+        // 3.4 Staff Dashboard (7.4)
+        const renderStaffDashboard = () => {
+            const myAssets = appData.assets.filter(a => a.assignedToId === currentUser.id);
+            const totalAssigned = myAssets.length;
+            const faultyReported = myAssets.filter(a => a.status === 'Faulty').length;
+            const pendingRepairs = myAssets.filter(a => a.status === 'Under maintenance').length;
+
+            const content = `
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
+                    <div class="summary-card">
+                        <i data-lucide="box" class="w-8 h-8 mx-auto text-gray-500 mb-2"></i>
+                        <p class="text-sm font-medium text-gray-500">Total assets assigned</p>
+                        <p class="card-value card-value-blue">${totalAssigned}</p>
+                    </div>
+                    <div class="summary-card">
+                        <i data-lucide="alert-triangle" class="w-8 h-8 mx-auto text-gray-500 mb-2"></i>
+                        <p class="text-sm font-medium text-gray-500">Faulty assets reported</p>
+                        <p class="card-value card-value-red">${faultyReported}</p>
+                    </div>
+                    <div class="summary-card">
+                        <i data-lucide="refresh-cw" class="w-8 h-8 mx-auto text-gray-500 mb-2"></i>
+                        <p class="text-sm font-medium text-gray-500">Pending repairs</p>
+                        <p class="card-value card-value-yellow">${pendingRepairs}</p>
+                    </div>
+                </div>
+
+                <!-- Assigned Assets Table -->
+                <h3 class="text-xl font-semibold mb-4 text-gray-700">My Assigned Assets</h3>
+                <div class="overflow-x-auto">
+                    <table class="data-table min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr>
+                                <th>Asset ID</th>
+                                <th>Asset Name</th>
+                                <th>Status</th>
+                                <th>Date Assigned</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${myAssets.map(asset => {
+                                // Find assignment date (simplified to dateAdded for this prototype)
+                                const dateAssigned = asset.dateAdded;
+                                return `
+                                    <tr>
+                                        <td>${asset.id}</td>
+                                        <td>${asset.name}</td>
+                                        <td>
+                                            <span class="${asset.status === 'Active' ? 'status-active' : asset.status === 'Faulty' ? 'status-faulty' : 'status-under-maintenance'}">
+                                                ${asset.status}
+                                            </span>
+                                        </td>
+                                        <td>${dateAssigned}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="flex justify-end mt-4">
+                    <a href="#" id="view-all-my-assets" class="text-sm font-medium text-gray-500 hover:text-green-700" data-view="staff-assets">View all assets</a>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap justify-center sm:justify-start gap-4 mt-10 border-t pt-6">
+                    <button id="btn-report-fault" class="btn-primary flex items-center space-x-2">
+                        <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                        <span>Report faulty assets</span>
+                    </button>
+                    <button class="btn-secondary flex items-center space-x-2 bg-white">
+                        <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+                        <span>View requests status</span>
+                    </button>
+                </div>
+            `;
+            return renderDashboardLayout('Staff Dashboard', content);
+        };
+
+        // 3.5 Maintenance Officer Dashboard (7.5)
+        const renderMaintenanceDashboard = () => {
+            const reportedAssets = appData.faults;
+            const totalReported = reportedAssets.length;
+            const ongoingRepairs = reportedAssets.filter(f => f.status === 'Ongoing').length;
+            const repairedAssets = reportedAssets.filter(f => f.status === 'Repaired').length;
+
+            const content = `
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
+                    <div class="summary-card">
+                        <i data-lucide="file-text" class="w-8 h-8 mx-auto text-gray-500 mb-2"></i>
+                        <p class="text-sm font-medium text-gray-500">Total reported assets</p>
+                        <p class="card-value card-value-blue">${totalReported}</p>
+                    </div>
+                    <div class="summary-card">
+                        <i data-lucide="tool" class="w-8 h-8 mx-auto text-gray-500 mb-2"></i>
+                        <p class="text-sm font-medium text-gray-500">Ongoing repairs</p>
+                        <p class="card-value card-value-yellow">${ongoingRepairs}</p>
+                    </div>
+                    <div class="summary-card">
+                        <i data-lucide="check-circle" class="w-8 h-8 mx-auto text-gray-500 mb-2"></i>
+                        <p class="text-sm font-medium text-gray-500">Repaired Assets</p>
+                        <p class="card-value card-value-green">${repairedAssets}</p>
+                    </div>
+                </div>
+
+                <!-- Reported Assets Table -->
+                <h3 class="text-xl font-semibold mb-4 text-gray-700">Reported Assets</h3>
+                <div class="overflow-x-auto">
+                    <table class="data-table min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr>
+                                <th>Asset ID</th>
+                                <th>Asset Name</th>
+                                <th>Reported by</th>
+                                <th>Status</th>
+                                <th>Date reported</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${reportedAssets.map(fault => {
+                                // Find asset details
+                                const asset = appData.assets.find(a => a.id === fault.assetId) || {};
+                                return `
+                                    <tr>
+                                        <td>${fault.assetId}</td>
+                                        <td>${asset.name || 'N/A'}</td>
+                                        <td>${fault.reportedBy}</td>
+                                        <td>
+                                            <span class="${fault.status === 'Ongoing' ? 'status-under-maintenance' : 'status-repaired'}">
+                                                ${fault.status}
+                                            </span>
+                                        </td>
+                                        <td>${fault.dateReported}</td>
+                                        <td>
+                                            <button data-fault-id="${fault.id}" class="update-status-btn text-sm font-medium text-blue-600 hover:text-blue-800">
+                                                Update
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="flex justify-end mt-4">
+                    <a href="#" class="text-sm font-medium text-gray-500 hover:text-green-700" data-view="maintenance-reported">View all reports</a>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap justify-center sm:justify-start gap-4 mt-10 border-t pt-6">
+                    <button id="btn-update-status" class="btn-primary flex items-center space-x-2">
+                        <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                        <span>Update Status</span>
+                    </button>
+                    <button class="btn-secondary flex items-center space-x-2 bg-white">
+                        <i data-lucide="file-text" class="w-5 h-5"></i>
+                        <span>View Maintenance record</span>
+                    </button>
+                    <button class="btn-secondary flex items-center space-x-2 bg-white">
+                        <i data-lucide="edit" class="w-5 h-5"></i>
+                        <span>Add maintenance note</span>
+                    </button>
+                </div>
+            `;
+            return renderDashboardLayout('Maintenance Dashboard', content);
+        };
+
+        // 3.6 Admin: Add Asset Screen (7.6)
+        const renderAddAssetScreen = () => {
+            const users = appData.users.filter(u => u.role !== 'Admin'); // Admins don't assign to other Admins
+
+            const content = `
+                <div class="max-w-xl mx-auto py-4">
+                    <h2 class="text-2xl font-bold text-center mb-2 text-gray-800">Add New Asset</h2>
+                    <p class="text-center text-gray-500 mb-8">Fill in the details below to register a new asset</p>
+
+                    <form id="add-asset-form" class="space-y-6">
+                        <div>
+                            <label for="asset-name" class="block text-sm font-medium text-gray-700 mb-1">Asset Name</label>
+                            <input type="text" id="asset-name" placeholder="e.g., Laptop HP Probook 450" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label for="asset-category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                            <select id="asset-category" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                                <option value="" disabled selected>Select Category</option>
+                                <option value="Electronics">Electronics</option>
+                                <option value="Furniture">Furniture</option>
+                                <option value="Machinery">Machinery</option>
+                                <option value="Vehicle">Vehicle</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="asset-status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <select id="asset-status" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                                <option value="Active" selected>Active</option>
+                                <option value="Faulty">Faulty</option>
+                                <option value="Under maintenance">Under Maintenance</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="asset-assignedto" class="block text-sm font-medium text-gray-700 mb-1">Assigned To</label>
+                            <select id="asset-assignedto" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                                <option value="">Unassigned</option>
+                                ${users.map(user => `<option value="${user.id}">${user.name} (${user.department}, ${user.role})</option>`).join('')}
+                            </select>
+                        </div>
+
+                        <div class="flex justify-between space-x-4 pt-4">
+                            <button type="button" id="btn-cancel-add-asset" class="btn-secondary w-full">
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn-primary w-full shadow-lg">
+                                Save Asset
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            return renderDashboardLayout('Asset Registration', content);
+        };
+
+        // 3.7 Admin: Manage Users Screen
+        const renderManageUsersScreen = () => {
+            const users = appData.users;
+            const content = `
+                <div class="max-w-4xl mx-auto py-4">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-700">All System Users</h3>
+                    <div class="overflow-x-auto">
+                        <table class="data-table min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Department</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${users.map(user => `
+                                    <tr>
+                                        <td>${user.id}</td>
+                                        <td>${user.name}</td>
+                                        <td>${user.email}</td>
+                                        <td>${user.role}</td>
+                                        <td>${user.department}</td>
+                                        <td>
+                                            <button data-user-id="${user.id}" class="text-sm font-medium text-red-600 hover:text-red-800 delete-user-btn" ${user.id === currentUser.id ? 'disabled' : ''}>
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-8 text-center">
+                         <p class="text-gray-500 text-sm">New users can sign up via the main welcome page.</p>
+                    </div>
+                </div>
+            `;
+            return renderDashboardLayout('Manage Users', content);
+        };
+
+        // 3.8 Staff: Report Fault Screen
+        const renderReportFaultScreen = () => {
+            const myAssets = appData.assets.filter(a => a.assignedToId === currentUser.id);
+
+            const content = `
+                <div class="max-w-xl mx-auto py-4">
+                    <h2 class="text-2xl font-bold text-center mb-2 text-gray-800">Report Faulty Asset</h2>
+                    <p class="text-center text-gray-500 mb-8">Please select the asset and describe the issue.</p>
+
+                    <form id="report-fault-form" class="space-y-6">
+                        <div>
+                            <label for="fault-asset-id" class="block text-sm font-medium text-gray-700 mb-1">Asset Name / ID</label>
+                            <select id="fault-asset-id" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                                <option value="" disabled selected>Select your assigned asset</option>
+                                ${myAssets.map(asset => `<option value="${asset.id}">${asset.name} (${asset.id}) - Status: ${asset.status}</option>`).join('')}
+                            </select>
+                            ${myAssets.length === 0 ? '<p class="text-red-500 text-xs mt-1">You have no assets assigned to report against.</p>' : ''}
+                        </div>
+                        <div>
+                            <label for="fault-description" class="block text-sm font-medium text-gray-700 mb-1">Detailed Description of Fault</label>
+                            <textarea id="fault-description" rows="4" placeholder="e.g., The screen flickers intermittently and the keyboard is unresponsive." required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"></textarea>
+                        </div>
+
+                        <div class="flex justify-between space-x-4 pt-4">
+                            <button type="button" id="btn-cancel-fault-report" class="btn-secondary w-full">
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn-primary w-full shadow-lg" ${myAssets.length === 0 ? 'disabled' : ''}>
+                                Submit Report
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            return renderDashboardLayout('Fault Reporting', content);
+        };
+
+        // 3.9 Maintenance: Update Status Screen
+        const renderUpdateStatusScreen = () => {
+            const reportedFaults = appData.faults;
+
+            const content = `
+                <div class="max-w-xl mx-auto py-4">
+                    <h2 class="text-2xl font-bold text-center mb-2 text-gray-800">Update Maintenance Status</h2>
+                    <p class="text-center text-gray-500 mb-8">Select a reported asset to log a status change.</p>
+
+                    <form id="update-status-form" class="space-y-6">
+                        <div>
+                            <label for="update-fault-id" class="block text-sm font-medium text-gray-700 mb-1">Reported Asset (Fault ID)</label>
+                            <select id="update-fault-id" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                                <option value="" disabled selected>Select a reported issue</option>
+                                ${reportedFaults.map(fault => `<option value="${fault.id}">${fault.assetName} (${fault.assetId}) - Reported by: ${fault.reportedBy}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="update-new-status" class="block text-sm font-medium text-gray-700 mb-1">New Maintenance Status</label>
+                            <select id="update-new-status" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                                <option value="Under maintenance">Under Maintenance (Initial Status)</option>
+                                <option value="Ongoing">Ongoing Repair</option>
+                                <option value="Repaired">Repaired</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="update-note" class="block text-sm font-medium text-gray-700 mb-1">Maintenance Note (Optional)</label>
+                            <textarea id="update-note" rows="3" placeholder="e.g., Replaced faulty power adapter and cleaned fans." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"></textarea>
+                        </div>
+
+                        <div class="flex justify-between space-x-4 pt-4">
+                            <button type="button" id="btn-cancel-update-status" class="btn-secondary w-full">
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn-primary w-full shadow-lg">
+                                Log Status Update
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            return renderDashboardLayout('Update Maintenance Status', content);
+        };
+
+
+        // --- 4. EVENT HANDLERS (Business Logic) ---
+
+        // Attaches all event listeners for the currently rendered view
+        const attachEventListeners = () => {
+            // General Navigation (Dashboard Links)
+            document.querySelectorAll('[data-view]').forEach(el => {
+                el.onclick = (e) => {
+                    e.preventDefault();
+                    navigate(e.currentTarget.getAttribute('data-view'));
+                };
+            });
+
+            // Welcome Page Navigation
+            const btnLoginNav = document.getElementById('btn-login-nav');
+            if (btnLoginNav) btnLoginNav.onclick = () => navigate('login');
+            const btnSignupNav = document.getElementById('btn-signup-nav');
+            if (btnSignupNav) btnSignupNav.onclick = () => navigate('signup');
+
+            // Auth Switch Link (Login <-> Sign Up)
+            const authSwitchLink = document.getElementById('auth-switch-link');
+            if (authSwitchLink) {
+                authSwitchLink.onclick = (e) => {
+                    e.preventDefault();
+                    navigate(e.currentTarget.getAttribute('data-mode'));
+                };
+            }
+
+            // --- 4.1 AUTHENTICATION LOGIC ---
+            const loginForm = document.getElementById('login-form');
+            if (loginForm) {
+                loginForm.onsubmit = handleLogin;
+            }
+
+            const signupForm = document.getElementById('signup-form');
+            if (signupForm) {
+                signupForm.onsubmit = handleSignup;
+            }
+
+            const btnLogout = document.getElementById('btn-logout');
+            if (btnLogout) {
+                btnLogout.onclick = handleLogout;
+            }
+
+            // --- 4.2 ADMIN ACTIONS ---
+            const btnAddNewAsset = document.getElementById('btn-add-new-asset');
+            if (btnAddNewAsset) btnAddNewAsset.onclick = () => navigate('admin-add-asset');
+            const btnManageUsers = document.getElementById('btn-manage-users');
+            if (btnManageUsers) btnManageUsers.onclick = () => navigate('admin-manage-users');
+
+            const btnCancelAddAsset = document.getElementById('btn-cancel-add-asset');
+            if (btnCancelAddAsset) btnCancelAddAsset.onclick = () => navigate('admin');
+
+            const addAssetForm = document.getElementById('add-asset-form');
+            if (addAssetForm) addAssetForm.onsubmit = handleAddAsset;
+
+            document.querySelectorAll('.delete-user-btn').forEach(btn => {
+                btn.onclick = handleDeleteUser;
+            });
+
+            // --- 4.3 STAFF ACTIONS ---
+            const btnReportFault = document.getElementById('btn-report-fault');
+            if (btnReportFault) btnReportFault.onclick = () => navigate('staff-report-fault');
+
+            const btnCancelFaultReport = document.getElementById('btn-cancel-fault-report');
+            if (btnCancelFaultReport) btnCancelFaultReport.onclick = () => navigate('staff');
+
+            const reportFaultForm = document.getElementById('report-fault-form');
+            if (reportFaultForm) reportFaultForm.onsubmit = handleReportFault;
+
+            // --- 4.4 MAINTENANCE ACTIONS ---
+            const btnUpdateStatus = document.getElementById('btn-update-status');
+            if (btnUpdateStatus) btnUpdateStatus.onclick = () => navigate('maintenance-update-status');
+
+            const btnCancelUpdateStatus = document.getElementById('btn-cancel-update-status');
+            if (btnCancelUpdateStatus) btnCancelUpdateStatus.onclick = () => navigate('maintenance');
+
+            const updateStatusForm = document.getElementById('update-status-form');
+            if (updateStatusForm) updateStatusForm.onsubmit = handleUpdateStatus;
+
+            document.querySelectorAll('.update-status-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    // Pre-select the asset in the update status form if clicked from the dashboard
+                    const faultId = e.currentTarget.getAttribute('data-fault-id');
+                    navigate('maintenance-update-status');
+                    setTimeout(() => {
+                        const selectElement = document.getElementById('update-fault-id');
+                        if (selectElement) {
+                            selectElement.value = faultId;
+                        }
+                    }, 50); // Small delay to ensure render is complete
+                };
+            });
+        };
+
+        // --- 5. DATA MANIPULATION FUNCTIONS ---
+
+        const generateId = (prefix) => {
+            return prefix + Math.random().toString(36).substring(2, 9).toUpperCase();
+        }
+
+        // 5.1 Auth Logic
+        const handleLogin = (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            const user = appData.users.find(u => u.email === email && u.password === password);
+
+            if (user) {
+                currentUser = user;
+                showModal('Success', `Welcome back, ${user.name}! Redirecting to your ${user.role} Dashboard.`, () => {
+                    // Redirect based on role
+                    if (user.role === 'Admin') navigate('admin');
+                    else if (user.role === 'Staff') navigate('staff');
+                    else if (user.role === 'Maintenance') navigate('maintenance');
+                }, 'Proceed');
+
+            } else {
+                showModal('Login Failed', 'Invalid email or password. Please try again.', null, 'Close');
+            }
+        };
+
+        const handleSignup = (e) => {
+            e.preventDefault();
+            const surname = document.getElementById('signup-surname').value.trim();
+            const lastName = document.getElementById('signup-lastname').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const department = document.getElementById('signup-department').value;
+            const role = document.getElementById('signup-role').value;
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = document.getElementById('signup-confirm-password').value;
+
+            if (password !== confirmPassword) {
+                showModal('Signup Error', 'Passwords do not match.', null, 'Close');
+                return;
+            }
+            if (appData.users.some(u => u.email === email)) {
+                showModal('Signup Error', 'An account with this email already exists.', null, 'Close');
+                return;
+            }
+
+            const newUser = {
+                id: generateId('u'),
+                name: `${surname} ${lastName}`,
+                email: email,
+                password: password,
+                role: role,
+                department: department
+            };
+
+            appData.users.push(newUser);
+            saveData();
+
+            showModal('Account Created', `Welcome, ${newUser.name}! Your ${newUser.role} account has been created. Please log in.`, () => {
+                navigate('login');
+            }, 'Go to Login');
+        };
+
+        const handleLogout = (e) => {
+            e.preventDefault();
+            showModal('Logging Out', 'Are you sure you want to log out?', () => {
+                currentUser = null;
+                navigate('welcome');
+            }, 'Yes, Log Out', 'Cancel');
+        };
+
+        const handleDeleteUser = (e) => {
+            const userIdToDelete = e.currentTarget.getAttribute('data-user-id');
+            const user = appData.users.find(u => u.id === userIdToDelete);
+
+            if (userIdToDelete === currentUser.id) {
+                showModal('Error', 'You cannot delete your own account while logged in.', null, 'Close');
+                return;
+            }
+
+            showModal('Confirm Deletion', `Are you sure you want to delete the user: ${user.name} (${user.role})?`, () => {
+                appData.users = appData.users.filter(u => u.id !== userIdToDelete);
+                // Also unassign any assets from this user
+                appData.assets.forEach(asset => {
+                    if (asset.assignedToId === userIdToDelete) {
+                        asset.assignedToId = null;
+                        asset.assignedToName = null;
+                    }
+                });
+                saveData();
+                showModal('Success', `${user.name} has been deleted.`, () => navigate('admin-manage-users'), 'OK');
+            }, 'Yes, Delete', 'Cancel');
+        }
+
+        // 5.2 Admin Asset Management Logic
+        const handleAddAsset = (e) => {
+            e.preventDefault();
+            const name = document.getElementById('asset-name').value.trim();
+            const category = document.getElementById('asset-category').value;
+            const status = document.getElementById('asset-status').value;
+            const assignedToId = document.getElementById('asset-assignedto').value || null;
+
+            const assignedUser = appData.users.find(u => u.id === assignedToId);
+
+            const newAsset = {
+                id: generateId('A-'),
+                name: name,
+                category: category,
+                status: status,
+                assignedToId: assignedToId,
+                assignedToName: assignedUser ? assignedUser.name : null,
+                dateAdded: new Date().toLocaleDateString('en-GB') // DD/MM/YY
+            };
+
+            appData.assets.push(newAsset);
+            saveData();
+            showModal('Asset Added', `Asset ID ${newAsset.id} (${newAsset.name}) has been successfully added and assigned to ${newAsset.assignedToName || 'Unassigned'}.`, () => {
+                navigate('admin');
+            }, 'OK');
+        };
+
+        // 5.3 Staff Fault Reporting Logic
+        const handleReportFault = (e) => {
+            e.preventDefault();
+            const assetId = document.getElementById('fault-asset-id').value;
+            const description = document.getElementById('fault-description').value.trim();
+
+            const asset = appData.assets.find(a => a.id === assetId);
+
+            if (!asset) {
+                showModal('Error', 'Selected asset not found.', null, 'Close');
+                return;
+            }
+            if (asset.status !== 'Active') {
+                showModal('Error', `Asset ${asset.id} is already marked as ${asset.status}.`, null, 'Close');
+                return;
+            }
+
+            // 1. Update Asset Status
+            asset.status = 'Faulty';
+
+            // 2. Create Fault Report
+            const newFault = {
+                id: generateId('f'),
+                assetId: asset.id,
+                assetName: asset.name,
+                reportedBy: currentUser.name,
+                dateReported: new Date().toLocaleDateString('en-GB'),
+                description: description,
+                status: 'Ongoing' // Status for Maintenance Officer to pick up
+            };
+
+            appData.faults.push(newFault);
+            saveData();
+
+            showModal('Report Submitted', `Fault report for ${asset.name} (${asset.id}) has been submitted successfully. The Maintenance Officer has been notified.`, () => {
+                navigate('staff');
+            }, 'OK');
+        };
+
+        // 5.4 Maintenance Status Update Logic
+        const handleUpdateStatus = (e) => {
+            e.preventDefault();
+            const faultId = document.getElementById('update-fault-id').value;
+            const newStatus = document.getElementById('update-new-status').value;
+            const note = document.getElementById('update-note').value.trim();
+
+            const fault = appData.faults.find(f => f.id === faultId);
+
+            if (!fault) {
+                showModal('Error', 'Selected fault report not found.', null, 'Close');
+                return;
+            }
+
+            // 1. Update Fault Report Status
+            fault.status = newStatus;
+            fault.maintenanceNote = note;
+
+            // 2. Update Corresponding Asset Status
+            const asset = appData.assets.find(a => a.id === fault.assetId);
+            if (asset) {
+                if (newStatus === 'Repaired') {
+                    asset.status = 'Active'; // Asset is now ready for use
+                } else if (newStatus === 'Ongoing' || newStatus === 'Under maintenance') {
+                    asset.status = 'Under maintenance'; // Asset is still being repaired
+                } else {
+                    // Fallback to active if any other status is mistakenly set
+                    asset.status = 'Under maintenance';
+                }
+            }
+
+            // 3. Log a Transaction (Simplified)
+            appData.transactions.push({
+                id: generateId('t'),
+                assetId: fault.assetId,
+                action: `Maintenance Status Update: ${fault.assetName} set to ${newStatus}. Note: ${note}`,
+                date: new Date().toLocaleString('en-GB')
+            });
+
+            saveData();
+
+            showModal('Status Updated', `Maintenance status for ${fault.assetName} has been logged as "${newStatus}".`, () => {
+                navigate('maintenance');
+            }, 'OK');
+        };
+
+        // --- 6. INITIALIZATION ---
+
+        const init = () => {
+            loadData();
+            // Check for previous session (simplistic persistent login)
+            const storedUser = localStorage.getItem('sams_current_user');
+            if (storedUser) {
+                const user = JSON.parse(storedUser);
+                currentUser = appData.users.find(u => u.id === user.id);
+                if (currentUser) {
+                    if (currentUser.role === 'Admin') navigate('admin');
+                    else if (currentUser.role === 'Staff') navigate('staff');
+                    else if (currentUser.role === 'Maintenance') navigate('maintenance');
+                } else {
+                    navigate('welcome');
+                }
+            } else {
+                navigate('welcome');
+            }
+        };
+
+        // Add a listener to save the current user state on every render, simulating session management
+        const originalRender = render;
+        render = () => {
+            if (currentUser) {
+                localStorage.setItem('sams_current_user', JSON.stringify({ id: currentUser.id, role: currentUser.role }));
+            } else {
+                localStorage.removeItem('sams_current_user');
+            }
+            originalRender();
+        };
+
+        // Start the application
+        init();
+
+    </script>
+</body>
+</html>

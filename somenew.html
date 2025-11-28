@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset Management Dashboard</title>
+    <!-- Font Awesome for icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="somenew.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.css">
+    
+</head>
+<body onload="initApp()">
+    <!-- 1. Navigation Menu -->
+    <div class="header">
+        <div class="logo">Admin Dashboard</div>
+        <nav class="menu" id="navMenu">
+            <a href="#dashboard">Dashboard</a>
+            <a href="#assets">Assets</a>
+            <a href="#users">Users</a>
+            <a href="login.html">Log out</a>
+        </nav>
+        <div class="hamburger-icon" id="hamburger">
+            <i class="fas fa-bars"></i>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="statusMessage" style="color: #4CAF50; font-weight: bold; margin-bottom: 15px;"></div>
+
+        <!-- 2. Dashboard Metrics -->
+        <div class="containers-body" id="metricCards">
+            <section class="metric-card total selected" data-filter="all">
+                <div class="icon"><i class="fa-solid fa-book"  style="color:  rgb(76, 160, 230);"></i></div>
+                <h3>Total Assets</h3>
+                <p id="totalAssetsCount">0</p>
+            </section>
+            
+            <section class="metric-card assigned" data-filter="assigned">
+                <div class="icon"><i class="fa-solid fa-clipboard-list" style="color:  rgb(76, 160, 230);"></i></div>
+                <h3>Assigned Assets</h3>
+                <p id="assignedAssetsCount">0</p>
+            </section>
+            
+            <section class="metric-card faulty" data-filter="faulty">
+                <div class="icon"><i class="fa-solid fa-triangle-exclamation"  style="color:  #F44336;"></i></div>
+                <h3 class="faultyy">Faulty Assets</h3>
+                <p id="faultyAssetsCount">0</p>
+            </section>
+            
+            <section class="metric-card active" data-filter="activeUsers">
+                <div class="icon"><i class="fa-regular fa-user" style="color:  #FFC107;"></i></div>
+                <h3 class="activve">Active Users</h3>
+                <p id="activeUsersCount">0</p>
+            </section>
+        </div>
+
+        <!-- 3. Asset Form and Table -->
+        <div class="content-layout">
+            <!-- Asset Form -->
+            <div id="assetFormContainer">
+                <h2 style="color: white;">Asset Management</h2>
+                <form id="assetForm">
+                    <div>
+                        <label for="assetName">Asset Name</label>
+                        <input type="text" id="assetName" required>
+                    </div>
+                    <div>
+                        <label for="category">Category </label>
+                        <select id="category" required>
+                            <option value="">-- Select --</option>
+                            <option value="Furniture">Furniture</option>
+                            <option value="Vehicle">Vehicle</option>
+                            <option value="Electronics">Electronics</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="assignedTo">Assigned To (User ID/Name)</label>
+                        <input type="text" id="assignedTo" placeholder="Leave blank if unassigned">
+                    </div>
+                    <div>
+                        <label for="status">Status</label>
+                        <select id="status" required>
+                            <option value="Available">Available</option>
+                            <option value="In use (Unassigned)">In use (Unassigned)</option>
+                            <option value="Assigned">Assigned</option>
+                            <option value="Faulty">Faulty</option>
+                            <option value="Disposed">Disposed</option>
+                        </select>
+                    </div>
+                    <button type="submit" id="submitButton">Add Asset</button>
+                    <input type="hidden" id="editFirestoreId">
+                </form>
+            </div>
+
+           
+            <div class="table-container">
+                <h2 style="color: black;">Asset List (<span id="currentFilterLabel">All Assets</span>)</h2>
+                <div id="loading-message" class="hidden">Loading assets...</div>
+                <table id="assetTable reports">
+                    <thead>
+                        <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Assigned To</th>
+                    <th>Date Added</th>
+                    <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assetTableBody">
+                       
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="somenjew.js">
+       
+        
+    </script>
+</body>
+</html>

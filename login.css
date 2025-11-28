@@ -1,0 +1,195 @@
+body{
+align-items: center;
+justify-content: center;
+background: white;
+font-size: var(--font-size-h);
+font-family: 'poppins', sans-serif;
+/* font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; */
+} 
+
+div{
+  display: flex;
+  height: 100vh;
+  background: white;
+  align-items: center;
+  justify-content: center;  
+  flex-direction: column;
+}
+
+
+.main-section {
+  width: 40%;
+}
+section h1 {
+  text-align: center;
+  color: rgb(12, 129, 12);
+  margin-bottom: 3rem;
+}
+
+.required1 ,.required2,.required3 {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: rgb(250, 31, 31);
+}
+
+
+input {
+  font-size: 0.8rem;
+  width: 100%;
+  margin: 0.4rem 0;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  padding-left: 0.8rem;
+  border-radius: 1rem;
+  border: 1px solid rgb(215, 213, 213);
+}
+
+input::placeholder {
+  font-size: 0.8rem;
+  color: rgb(156, 156, 156);
+}
+
+.remember-me {
+  display: flex;
+  gap: 1rem;
+}
+
+.link-section {
+  /* gap: 16rem; */
+  display: flex;
+  width: 41.5%;
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.8rem;
+  font-family: lucida Sans;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.check-box {
+  width: 14px;
+  height: 14px;
+  margin-top: 10px;
+  padding-top: 4px;
+  background-color: rgb(222, 221, 221);
+  display: inline-block;
+} 
+
+a {
+  color: green;
+  padding-left: 1rem;
+}
+
+.link-section strong {
+  padding-left: 5px;
+  margin-bottom: 15px;
+  color: rgb(27, 26, 26);
+}
+
+.link-section .check-box-word {
+  margin-top: -10px;
+  margin-left: 0.6rem;
+}
+
+button {
+  color: white;
+  width: 41%;
+  margin-top: 1.5rem;
+  border: none;
+  text-align: center;
+  border-radius: 1rem;
+  padding: 0.7rem 0rem;
+  margin-left: 0.7rem;
+  transition: 0.2s ease;
+  background-color:  rgb(2, 85, 2);
+}
+
+/* .login {
+  color: white;
+  width: 41%;
+  margin-top: 1.5rem;
+  border: none;
+  text-align: center;
+  border-radius: 1rem;
+  padding: 0.7rem 0rem;
+  margin-left: 0.7rem;
+  transition: 0.2s ease;
+  background-color:  rgb(2, 85, 2);
+} */
+.java-btn{
+  color: white;
+}
+
+.logiin {
+  display: none;
+}
+/* #loginn{
+  width: 10px;
+} */
+.login:active {
+  color: green;
+  color: white;
+  width: 41%;
+  margin-top: 1.5rem;
+  border: none;
+  text-align: center;
+  border-radius: 1rem;
+  padding: 0.7rem 0rem;
+  margin-left: 0.7rem;
+  background-color:  rgb(2, 85, 2);
+  border: 1px solid green;
+  background-color: white;
+}
+
+.login:hover {
+  cursor: pointer;
+  background-color: rgb(3, 113, 3);
+}
+p {
+  text-align: center;
+}
+
+.loginn {
+  color: white;
+  width: 41%;
+  margin-top: 1.5rem;
+  border: none;
+  text-align: center;
+  border-radius: 1rem;
+  padding: 0.7rem 0rem;
+  margin-left: 0.7rem;
+  transition: 0.2s ease;
+  background-color:  rgb(2, 85, 2);
+}
+
+.loginn:active {
+  color: green;
+  border: 1px solid green;
+  background-color: white;
+}
+
+.last-link {
+  padding-left: 0;
+}
+
+button:hover {
+  cursor: pointer;
+  background-color: rgb(3, 113, 3);
+}
+
+button:active {
+  color: green;
+  border: 1px solid green;
+  background-color: white;
+}
+ /* .input1 {
+  margin-left: -0.2rem;
+}
+
+.input2 {
+  margin-right: 0;
+  margin-left: 2px;
+}  */
+
+
+

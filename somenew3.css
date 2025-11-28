@@ -1,0 +1,316 @@
+ body {
+            font-family: 'Arial', sans-serif;
+            background: white; /* Darker background */
+            color: black;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* --- Navigation Bar --- */
+        .header {
+            background-color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: green;
+        }
+
+        .menu {
+            display: flex;
+            gap: 20px;
+        }
+
+        .menu a {
+            color: green;
+            text-decoration: none;  
+            padding: 8px 15px;
+            border-radius: 6px;
+            transition: background-color 0.3s;
+        }
+
+        .menu a:hover {
+            color: white;
+            border: none;
+            background-color: green;
+        }
+
+        .hamburger-icon {
+            display: none; /* Hidden by default on large screens */
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+
+        /* --- Main Layout --- */
+        .container {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 20px auto;
+        }
+        
+        /* --- Dashboard Cards (Metrics) --- */
+        .containers-body {
+            display: grid;
+            margin-left: 5rem;
+            align-items: center;
+            justify-content: center;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 50px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card .faultyy{
+            color:  #F44336;
+        }
+
+        .metric-card .activve {
+            color: #FFC107;
+        }
+
+        .metric-card {
+            background: rgb(42, 110, 42);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); */
+            /* border-left: 5px solid; */
+        }
+        
+        /* Add a selected state for filtering */
+        .metric-card.selected {
+            box-shadow: 0 0 0 3px green, 0 8px 15px white;
+            transform: translateY(-5px);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* .metric-card.total.selected { border-color: #FFC107; }
+        .metric-card.assigned { border-color: #4CAF50; }
+        .metric-card.faulty { border-color: #F44336; }
+        .metric-card.active { border-color: #2196F3; }
+        .metric-card.total { border-color: #FFC107; } */
+
+        .metric-card h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+            color: rgb(76, 160, 230);
+        }
+
+        .metric-card p {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0;
+            color: #ffffff;
+        }
+        
+        .metric-card .icon {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        /* --- Asset Form & Table Layout --- */
+        .content-layout {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        /* --- Asset Form --- */
+        #assetForm {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        #assetForm label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #bbb;
+        }
+
+        #assetForm input[type="text"],
+        #assetForm select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #3a3f45;
+            border-radius: 6px;
+            background-color: #ffffff;
+            color: black;
+            box-sizing: border-box;
+        }
+
+        #assetForm button[type="submit"] {
+            background-color: green;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            /* border: 1px solid black; */
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        #assetForm button[type="submit"]:hover {
+            color: green;
+            border: 1px solid green; 
+            background-color: white;
+            transform: translateY(-1px);
+        }
+
+        /* --- Assets Table --- */
+        .table-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            overflow-x: auto; /* For table responsiveness */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #3a3f45;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: white;
+            color: black;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+         tbody tr:hover {
+            cursor: pointer;
+
+        } 
+
+        .actions button {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+            font-size: 0.8rem;
+            transition: opacity 0.2s;
+        }
+
+        .actions button:hover {
+            opacity: 0.8;
+        }
+
+        .edit-btn {
+            background-color: #FFC107;
+            color: #1e2126;
+        }
+
+        .delete-btn {
+            background-color: #F44336;
+            color: #ffffff;
+        }
+        
+        /* --- Utility & Loading --- */
+        .hidden {
+            display: none !important;
+        }
+
+        #loading-message {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2rem;
+            color: #61dafb;
+        }
+
+        /* --- Media Queries for Responsiveness --- */
+
+        /* Mobile Devices (max-width: 640px) */
+        @media (max-width: 640px) {
+            .header {
+                padding: 10px 20px;
+            }
+
+            .menu {
+                display: none; /* Hide menu items */
+                flex-direction: column;
+                position: absolute;
+                top: 60px; /* Below the header */
+                left: 0;
+                width: 100%;
+                background-color: #1e2126;
+                z-index: 100;
+                padding: 10px 0;
+            }
+
+            .menu.active {
+                display: flex;
+            }
+
+            .menu a {
+                padding: 10px 30px;
+                border-radius: 0;
+                border-bottom: 1px solid #3a3f45;
+            }
+
+            .hamburger-icon {
+                display: block; /* Show hamburger */
+            }
+
+            .containers-body {
+                grid-template-columns: 1fr; /* Single column */
+            }
+
+            .content-layout {
+                grid-template-columns: 1fr; /* Single column */
+            }
+
+            #assetForm {
+                order: 2; 
+            }
+
+            .table-container {
+                order: 1;
+            }
+        }
+
+        /* Tablet Devices (max-width: 1024px) */
+        @media (min-width: 641px) and (max-width: 1024px) {
+            .containers-body {
+                grid-template-columns: repeat(2, 1fr); /* Two columns */
+            }
+
+            .content-layout {
+                grid-template-columns: 1fr; /* Stack form and table */
+            }
+        }
+
+        /* Desktop Devices (min-width: 1025px) */
+        @media (min-width: 1025px) {
+            .containers-body {
+                grid-template-columns: repeat(4, 1fr); /* Four columns */
+            }
+
+            .content-layout {
+                grid-template-columns: 1fr 2fr; /* Form on left, table on right */
+            }
+        }
